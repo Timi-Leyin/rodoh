@@ -1,6 +1,6 @@
 {
   "name": "Rodo",
-  "description": "A simple screen recorded with zooming and panning.",
+  "description": "A simple screen recorded with zooming and panning. 🌶️",
   "{{chrome}}.manifest_version": 3,
   "{{firefox}}.manifest_version": 2,
   "icons": {

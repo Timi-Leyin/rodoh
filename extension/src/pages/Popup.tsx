@@ -1,18 +1,29 @@
 import { useEffect } from 'react';
 import "./Popup.css";
+import Header from '../components/header';
+import Button from '../components/button';
+import useMediaCapture from '../hooks/useMediaCapture';
 
 export default function() {
-  useEffect(() => {
-    console.log("Hello from the popup!");
-  }, []);
+  const { isRecording, captureMedia, stopCapture } = useMediaCapture();
 
   return (
-    <div>
-      <img src="/icon-with-shadow.svg" />
-      <h1>vite-plugin-web-extension</h1>
-      <p>
-        Template: <code>react-ts</code>
-      </p>
+    <div className='text-white'>
+      <Header/>
+      
+      <Button 
+        variant={isRecording ? 'danger' : 'primary'}
+        className='min-w-full' 
+        onClick={isRecording ? stopCapture : captureMedia}
+      >
+        {isRecording ? 'Stop Recording' : 'Start Recording'}
+      </Button>
+
+      {isRecording && (
+        <div className="mt-4 text-center text-sm text-gray-300 animate-pulse">
+          Recording in progress...
+        </div>
+      )}
     </div>
-  )
+  );
 }
