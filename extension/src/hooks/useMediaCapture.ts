@@ -1,58 +1,111 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import browser from "webextension-polyfill";
 
 interface MediaCaptureHook {
   isRecording: boolean;
   captureMedia: () => Promise<void>;
-  stopCapture: () => void;
+  stopCapture: () => Promise<void>;
 }
 
 const useMediaCapture = (): MediaCaptureHook => {
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
+  useEffect(() => {
+    browser.runtime.sendMessage({ type: 'GET_RECORDING_STATE' })
+      .then(state => setIsRecording(state));
+
+    const handleStorageChange = (changes: { [key: string]: any }) => {
+      if (changes.isRecording) {
+        setIsRecording(changes.isRecording.newValue);
+      }
+    };
+
+    browser.storage.onChanged.addListener(handleStorageChange);
+    return () => {
+      browser.storage.onChanged.removeListener(handleStorageChange);
+      if (mediaRecorderRef.current?.state === 'recording') {
+        stopCapture();
+      }
+    };
+  }, []);
 
   const captureMedia = async () => {
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          cursor: "always",
-          displaySurface: "monitor",
-        },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-        }
+        video: { cursor: "always" },
+        audio: { echoCancellation: true },
+        systemAudio: "include"
       });
 
       const recorder = new MediaRecorder(stream);
-      setMediaRecorder(recorder);
+      chunksRef.current = [];
 
-      const chunks: Blob[] = [];
-      recorder.ondataavailable = (e) => chunks.push(e.data);
-      
-      recorder.onstop = () => {
-        const recording = new Blob(chunks, { type: 'video/webm' });
-        const url = URL.createObjectURL(recording);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `screen-recording-${Date.now()}.webm`;
-        a.click();
-        URL.revokeObjectURL(url);
-        setIsRecording(false);
+      recorder.ondataavailable = (e) => {
+        chunksRef.current.push(e.data);
       };
 
-      recorder.start();
+      recorder.onstop = async () => {
+        const recording = new Blob(chunksRef.current, { type: 'video/webm' });
+        const url = URL.createObjectURL(recording);
+        
+        await browser.downloads.download({
+          url: url,
+          filename: `screen-recording-${Date.now()}.webm`,
+          saveAs: true
+        });
+        
+        URL.revokeObjectURL(url);
+        chunksRef.current = [];
+        
+
+        setIsRecording(false);
+        await browser.runtime.sendMessage({ 
+          type: 'UPDATE_RECORDING_STATE', 
+          isRecording: false 
+        });
+      };
+
+
+      recorder.start(1000);
+      mediaRecorderRef.current = recorder;
       setIsRecording(true);
+      await browser.runtime.sendMessage({ 
+        type: 'UPDATE_RECORDING_STATE', 
+        isRecording: true 
+      });
     } catch (error) {
-      console.error('Error capturing media:', error);
+      console.error('Error starting recording:', error);
       setIsRecording(false);
-      throw error;
+      await browser.runtime.sendMessage({ 
+        type: 'UPDATE_RECORDING_STATE', 
+        isRecording: false 
+      });
     }
   };
 
-  const stopCapture = () => {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop();
-      mediaRecorder.stream.getTracks().forEach(track => track.stop());
+  const stopCapture = async () => {
+    console.log('Attempting to stop capture...');
+    try {
+      const result = await browser.runtime.sendMessage({ type: 'STOP_RECORDING' });
+      console.log('Stop recording message sent, result:', result);
+      
+      if (mediaRecorderRef.current?.state === 'recording') {
+        const tracks = mediaRecorderRef.current.stream.getTracks();
+        mediaRecorderRef.current.stop();
+        tracks.forEach(track => track.stop());
+        mediaRecorderRef.current = null;
+      }
+      
+
+      setIsRecording(false);
+      await browser.runtime.sendMessage({ 
+        type: 'UPDATE_RECORDING_STATE', 
+        isRecording: false 
+      });
+    } catch (error) {
+      console.error('Error stopping recording:', error);
     }
   };
 
