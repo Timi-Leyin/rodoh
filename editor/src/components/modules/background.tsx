@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import DefaultCard from "@/components/modules/card.tsx";
 
 const backgroundColors = [
   { id: 1, color: "from-rose-500 to-orange-500" },
@@ -22,50 +22,44 @@ const solidColors = [
 
 export default function BackgroundModule() {
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Background</CardTitle>
-      </CardHeader>
+    <DefaultCard title={"Background 🟠"}>
+      <Tabs defaultValue="gradient">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="gradient">Gradient</TabsTrigger>
+          <TabsTrigger value="solid">Solid</TabsTrigger>
+        </TabsList>
 
-      <CardContent className="space-y-4">
-        <Tabs defaultValue="gradient">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="gradient">Gradient</TabsTrigger>
-            <TabsTrigger value="solid">Solid</TabsTrigger>
-          </TabsList>
+        <TabsContent value="gradient" className="mt-4">
+          <div className="grid grid-cols-4 gap-2">
+            {backgroundColors.map((bg) => (
+              <button
+                key={bg.id}
+                className={cn(
+                  "h-15 w-15 rounded-md cursor-pointer bg-gradient-to-br",
+                  bg.color,
+                  "hover:opacity-90 transition-opacity",
+                )}
+              />
+            ))}
+          </div>
+        </TabsContent>
 
-          <TabsContent value="gradient" className="mt-4">
-            <div className="grid grid-cols-4 gap-2">
-              {backgroundColors.map((bg) => (
-                <button
-                  key={bg.id}
-                  className={cn(
-                    "h-15 w-15 rounded-md cursor-pointer bg-gradient-to-br",
-                    bg.color,
-                    "hover:opacity-90 transition-opacity",
-                  )}
-                />
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="solid" className="mt-4">
-            <div className="grid grid-cols-3 gap-2">
-              {solidColors.map((bg) => (
-                <button
-                  key={bg.id}
-                  className={cn(
-                    "h-12 rounded-md",
-                    bg.color,
-                    "hover:opacity-90 transition-opacity",
-                    bg.color === "bg-white" && "border border-gray-200",
-                  )}
-                />
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+        <TabsContent value="solid" className="mt-4">
+          <div className="grid grid-cols-3 gap-2">
+            {solidColors.map((bg) => (
+              <button
+                key={bg.id}
+                className={cn(
+                  "h-12 rounded-md",
+                  bg.color,
+                  "hover:opacity-90 transition-opacity",
+                  bg.color === "bg-white" && "border border-gray-200",
+                )}
+              />
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </DefaultCard>
   );
 }
