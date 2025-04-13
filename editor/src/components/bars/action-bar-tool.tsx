@@ -4,7 +4,7 @@ import MediaModule from "@/components/modules/media.tsx";
 
 function ActionBarTool() {
   return (
-    <div className="bg-white rounded-md p-4 w-[350px] h-[80vh] space-y-4">
+    <div className="bg-white rounded-md overflow-auto p-4  lg:w-[350px] h-[80vh] space-y-4">
       <MediaModule />
       <BackgroundModule />
 

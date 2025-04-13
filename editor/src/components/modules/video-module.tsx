@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { getQueryParams } from "@/utils";
 import useEditorStore from "@/store/editor.store.ts";
-import MediaDisplay from "@/components/modules/video.tsx";
 import ReactPlayer from "react-player";
 function VideoModule() {
   const videoUrl = getQueryParams();
@@ -14,8 +13,6 @@ function VideoModule() {
       );
     }
   }, [videoUrl]);
-
-  console.log("we are recording ");
 
   return (
     <div
