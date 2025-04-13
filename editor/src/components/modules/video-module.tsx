@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { getQueryParams } from "@/utils";
 import useEditorStore from "@/store/editor.store.ts";
+import MediaDisplay from "@/components/modules/video.tsx";
+import ReactPlayer from "react-player";
 function VideoModule() {
   const videoUrl = getQueryParams();
   const { editorBg } = useEditorStore();
@@ -18,15 +20,14 @@ function VideoModule() {
   return (
     <div
       className={`
-      w-full  h-[80%] flex items-center justify-center
+      w-full  h-[80%] flex items-center justify-center !rounded-lg
       ${editorBg}
     `}
     >
-      <div className={"w-[90%]"}>
+      <div className={"w-[95%] bg-gray-300 h-[90%] !rounded-lg"}>
         {videoUrl ? (
-          <video
-            src={videoUrl}
-            controls
+          <ReactPlayer
+            url={videoUrl}
             className="w-full h-full object-contain rounded-md"
           />
         ) : (
