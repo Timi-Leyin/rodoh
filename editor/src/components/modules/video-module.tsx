@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useEditorStore from "@/store/editor.store.ts";
 import ReactPlayer from "react-player";
+import html2canvas from "html2canvas";
 
 function VideoModule() {
   const { editorBg } = useEditorStore();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     if (!videoUrl) {
@@ -20,6 +23,44 @@ function VideoModule() {
     }
   };
 
+  const handleExport = async () => {
+    if (!containerRef.current) return;
+    setIsExporting(true);
+
+    const exportContainer = containerRef.current.cloneNode(true) as HTMLElement;
+    exportContainer.style.backgroundColor = 'rgb(255, 255, 255)';
+    exportContainer.style.position = 'fixed';
+    exportContainer.style.top = '0';
+    exportContainer.style.left = '0';
+    exportContainer.style.zIndex = '-1000';
+    document.body.appendChild(exportContainer);
+
+    try {
+      const canvas = await html2canvas(exportContainer, {
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+        removeContainer: true
+      });
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "exported-video-with-background.png";
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      });
+    } catch (error) {
+      console.error("Error exporting video:", error);
+    } finally {
+      document.body.removeChild(exportContainer);
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div
       className={`
@@ -27,7 +68,10 @@ function VideoModule() {
       ${editorBg}
     `}
     >
-      <div className="w-[90%] h-[90%]  !rounded-lg flex items-center justify-center relative">
+      <div
+        ref={containerRef}
+        className="w-[90%] h-[90%] !rounded-lg flex items-center justify-center relative"
+      >
         {videoUrl ? (
           <ReactPlayer
             url={videoUrl}
@@ -41,8 +85,7 @@ function VideoModule() {
         )}
       </div>
 
-
-      <div className="mt-4">
+      <div className="mt-4 flex gap-4">
         <label
           htmlFor="video-upload"
           className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
@@ -56,6 +99,16 @@ function VideoModule() {
           className="hidden"
           onChange={handleFileUpload}
         />
+
+        <button
+          onClick={handleExport}
+          className={`bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 ${
+            isExporting ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          disabled={isExporting}
+        >
+          {isExporting ? "Exporting..." : "Export Video"}
+        </button>
       </div>
     </div>
   );
