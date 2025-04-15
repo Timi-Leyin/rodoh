@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import browser from 'webextension-polyfill';
 import {MESSAGE_TYPES} from "../enums/messages";
+import {BROARD_CAST} from "../../../constant";
 
 interface MediaCaptureHook {
   isRecording: boolean;
@@ -39,6 +40,8 @@ const useMediaCapture = (): MediaCaptureHook => {
         audio: true,
       });
 
+
+
       let audioStream: MediaStream | null = null;
 
       try {
@@ -71,23 +74,47 @@ const useMediaCapture = (): MediaCaptureHook => {
       };
 
       recorder.onstop = async () => {
-        const recording = new Blob(chunksRef.current, { type: 'video/webm' });
-        const url = URL.createObjectURL(recording);
+        try {
+          const recording = new Blob(chunksRef.current, { type: 'video/webm' });
 
-        await browser.downloads.download({
-          url: url,
-          filename: `screen-recording-${Date.now()}.webm`,
-          saveAs: true,
-        });
 
-        URL.revokeObjectURL(url);
-        chunksRef.current = [];
+          const formData = new FormData();
+          formData.append('file', recording, 'screen-recording.webm');
 
-        setIsRecording(false);
-        await browser.runtime.sendMessage({
-          type: MESSAGE_TYPES.UPDATE_RECORDING_STATE,
-          isRecording: false,
-        });
+
+          const response = await fetch('https://store1.gofile.io/uploadFile', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const result = await response.json();
+
+          if (result.status !== 'ok') {
+            throw new Error('Upload failed');
+          }
+
+          const data = result.data;
+
+          await browser.storage.local.set({
+            recordingUrl: data.downloadPage,
+            fileId: data.id,
+            fileName: data.name,
+            fileSize: data.size,
+            mimeType: data.mimetype,
+            timestamp: Date.now(),
+            expires: data.modTime, 
+          });
+
+          await browser.tabs.create({
+            url: `http://localhost:5174/?fileUrl=${encodeURIComponent(data.downloadPage)}`,
+          });
+
+          chunksRef.current = [];
+          setIsRecording(false);
+        } catch (error) {
+          console.error('Error handling recording:', error);
+          setIsRecording(false);
+        }
       };
 
       recorder.start(1000);
@@ -111,7 +138,7 @@ const useMediaCapture = (): MediaCaptureHook => {
   const stopCapture = async () => {
     console.log('Attempting to stop capture...');
     try {
-      const result = await browser.runtime.sendMessage({ type: 'STOP_RECORDING' });
+      const result = await browser.runtime.sendMessage({ type: MESSAGE_TYPES.STOP_RECORDING});
       console.log('Stop recording message sent, result:', result);
 
       if (mediaRecorderRef.current?.state === 'recording') {
