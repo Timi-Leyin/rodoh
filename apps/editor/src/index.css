@@ -1,3 +1,4 @@
+@import "tailwindcss";
 html {
   cursor: url("../public/cursor.png"), auto;
 }
