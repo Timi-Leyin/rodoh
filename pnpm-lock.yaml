@@ -167,7 +167,7 @@ importers:
         version: 0.12.2
       '@tailwindcss/vite':
         specifier: ^4.1.3
-        version: 4.1.4(vite@apps+extension+@types+@tailwindcss+vite)
+        version: 4.1.4(vite@6.3.3(@types/node@22.15.2)(jiti@2.4.2)(lightningcss@1.29.2)(yaml@2.7.1))
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -177,6 +177,9 @@ importers:
       tailwindcss:
         specifier: ^4.1.3
         version: 4.1.4
+      vite:
+        specifier: ^6.2.0
+        version: 6.3.3(@types/node@22.15.2)(jiti@2.4.2)(lightningcss@1.29.2)(yaml@2.7.1)
     devDependencies:
       '@types/react':
         specifier: ^18.0.26
@@ -189,13 +192,10 @@ importers:
         version: 0.10.7
       '@vitejs/plugin-react':
         specifier: ^4.2.1
-        version: 4.4.1(vite@apps+extension+@types+@tailwindcss+vite)
+        version: 4.4.1(vite@6.3.3(@types/node@22.15.2)(jiti@2.4.2)(lightningcss@1.29.2)(yaml@2.7.1))
       typescript:
         specifier: ~5.6.3
         version: 5.6.3
-      vite:
-        specifier: link:@types/@tailwindcss/vite
-        version: link:@types/@tailwindcss/vite
       vite-plugin-web-extension:
         specifier: ^4.0.0
         version: 4.4.3(@types/node@22.15.2)(jiti@2.4.2)(lightningcss@1.29.2)
@@ -6033,13 +6033,6 @@ snapshots:
       tailwindcss: 4.1.4
       vite: 6.3.3(@types/node@22.15.2)(jiti@2.4.2)(lightningcss@1.29.2)(yaml@2.7.1)
 
-  '@tailwindcss/vite@4.1.4(vite@apps+extension+@types+@tailwindcss+vite)':
-    dependencies:
-      '@tailwindcss/node': 4.1.4
-      '@tailwindcss/oxide': 4.1.4
-      tailwindcss: 4.1.4
-      vite: link:apps/extension/@types/@tailwindcss/vite
-
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
   '@tsconfig/node10@1.0.11': {}
@@ -6331,14 +6324,14 @@ snapshots:
     transitivePeerDependencies:
       - '@swc/helpers'
 
-  '@vitejs/plugin-react@4.4.1(vite@apps+extension+@types+@tailwindcss+vite)':
+  '@vitejs/plugin-react@4.4.1(vite@6.3.3(@types/node@22.15.2)(jiti@2.4.2)(lightningcss@1.29.2)(yaml@2.7.1))':
     dependencies:
       '@babel/core': 7.26.10
       '@babel/plugin-transform-react-jsx-self': 7.25.9(@babel/core@7.26.10)
       '@babel/plugin-transform-react-jsx-source': 7.25.9(@babel/core@7.26.10)
       '@types/babel__core': 7.20.5
       react-refresh: 0.17.0
-      vite: link:apps/extension/@types/@tailwindcss/vite
+      vite: 6.3.3(@types/node@22.15.2)(jiti@2.4.2)(lightningcss@1.29.2)(yaml@2.7.1)
     transitivePeerDependencies:
       - supports-color
 
