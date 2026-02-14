@@ -41,7 +41,7 @@
     "@types/video.js": "^7.3.58",
     "@types/webextension-polyfill": "^0.12.3",
     "@videojs/themes": "^1.0.1",
-    "axios": "^1.8.4",
+    "axios": "^1.13.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
